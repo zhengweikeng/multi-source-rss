@@ -3,7 +3,18 @@ import { Feed } from 'feed';
 export class RSSGenerator {
     constructor(source, items = []) {
         this.source = source;
-        this.items = items;
+        const historyItems = [];
+        items.forEach(item => {
+            historyItems.push({
+                title: item.title,
+                id: item.id,
+                link: item.link,
+                description: item.description,
+                content: item.content,
+                date: new Date(item.date),
+            });
+        });
+        this.items = historyItems;
     }
 
     generate(content) {
@@ -22,7 +33,7 @@ export class RSSGenerator {
 
         const latestItem = {
             title: formatDate,
-            id: this.source.url,
+            id: formatDate,
             link: this.source.url,
             description: this.source.description,
             content,
@@ -33,6 +44,8 @@ export class RSSGenerator {
             const firstItem = this.items[0];
             if (firstItem.title !== formatDate) {
                 this.items.unshift(latestItem)
+            } else {
+                this.items[0] = latestItem;
             }
         } else {
             this.items.unshift(latestItem)

@@ -12,7 +12,10 @@ export default {
                     const itemsCacheKey = `feed_items_${sourceId}`;
 
                     const itemStr = await env.RSS_KV.get(itemsCacheKey);
-                    const items = JSON.parse(itemStr);
+                    let items = []
+                    if (itemStr) {
+                        items = JSON.parse(itemStr);
+                    }
 
                     const crawler = new crawlers[sourceId](env.AI);
                     const content = await crawler.fetch();
@@ -55,6 +58,13 @@ export default {
                     'Content-Type': 'application/json',
                 },
             });
+        }
+
+        // 获取请求参数fresh，如果为1，强制刷新缓存
+        const fresh = url.searchParams.get('fresh') === '1';
+        if (fresh) {
+            console.log('Force refresh feed:', sourceId);
+            await this.scheduled(null, env, ctx);
         }
 
         // 检查源是否存在且启用
